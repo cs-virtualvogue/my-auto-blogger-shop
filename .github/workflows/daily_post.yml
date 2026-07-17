@@ -1,0 +1,36 @@
+name: AI Auto Blogger
+
+on:
+  schedule:
+    # รันอัตโนมัติทุกวันจันทร์ เวลา 09:00 น. (เวลาไทย คือ 02:00 UTC)
+    - cron: '0 2 * * 1'
+  workflow_dispatch: # เปิดให้กดรันเองแบบ Manual ได้ตลอดเวลา
+
+jobs:
+  run-blog-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10' # ระบุเวอร์ชัน Python ให้ชัดเจน
+        cache: 'pip'           # เปิดระบบแคชเพื่อความรวดเร็ว
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install --force-reinstall -r requirements.txt # บังคับติดตั้งแพ็กเกจใหม่ทั้งหมดให้ใสสะอาด
+
+    - name: Run Bot Script
+      env:
+        BLOG_ID: ${{ secrets.BLOG_ID }}
+        CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+        REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        python main.py
